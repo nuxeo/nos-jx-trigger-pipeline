@@ -48,4 +48,21 @@ For more information type:
 
 ``` 
 tp --help
+```       
+
+## How it works
+
+Under the covers the `trigger-pipeline` process uses Kubernetes Selectors to find Jenkins `Service` and `Secret` resources created by the [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/) when it provisions a Jenkins server pod as a result of a `Jenkins` custom resource being created. 
+
+You can view the Jenkins custom resources in your namespace via:
+
+``` 
+kubectl get jenkins
+```
+
+The default selector used by the [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/) is `app=jenkins-operator`. So you can view what Jenkins `Services` / `Secrets` will be used via:
+
+``` 
+kubectl get svc -l app=jenkins-operator
+kubectl get secret -l app=jenkins-operator
 ```
