@@ -7,4 +7,45 @@ This project creates a small stand alone binary for triggering pipelines in [Jen
 
 It helps bridge the gap between [Jenkins](https://jenkins.io/) and [Jenkins X](https://jenkins-x.io/) around ChatOps.
 
+
+## Using Trigger Pipeline CLI
+
+Download the binary and put it on your `$PATH` or use the trigger-pipeline container image in a pipeline step in Jenkins or Jenkins X / Tekton.
+
+To trigger a pipeline in the default Jenkins server:
+
+``` 
+tp
+```
+
+If you have multiple Jenkins server custom resources in the current namespace then specify the Jenkins custom resource name on the command line:
+
+``` 
+tp  --jenkins myJenkinsServer
+```
+
+If you are not sure what Jenkins names are available in the current namespace run:
+
+``` 
+kubectl get jenkins
+```
+
+Which will list all of the available Jenkins custom resource names.
+
+If you make a mistake and use a name which does not exist the `tp` executable will give you a meaninful error message togehter with listing all the available Jenkins custom resource names.
+
+
+### Using Environment Variables
+
+To make it easier to configure inside pipelines you can specify the Jenkins instance name via the `$TRIGGER_JENKINS_SERVER` environment variable
+
+```   
+export TRIGGER_JENKINS_SERVER="someJenkinsCrdName"
+tp
+```
  
+For more information type: 
+
+``` 
+tp --help
+```
