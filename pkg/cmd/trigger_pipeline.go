@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jenkins-x-labs/tp/pkg/helpers"
-	"github.com/jenkins-x-labs/tp/pkg/jenkinsutil"
-	"github.com/jenkins-x-labs/tp/pkg/jenkinsutil/factory"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/helpers"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/factory"
 	gojenkins "github.com/jenkins-x/golang-jenkins"
 	"github.com/jenkins-x/jx/pkg/cmd/helper"
 	"github.com/jenkins-x/jx/pkg/gits"

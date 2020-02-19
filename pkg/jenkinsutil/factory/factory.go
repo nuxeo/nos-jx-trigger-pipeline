@@ -1,7 +1,7 @@
 package factory
 
 import (
-	"github.com/jenkins-x-labs/tp/pkg/jenkinsutil"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil"
 	"github.com/jenkins-x/jx/pkg/jxfactory"
 	"k8s.io/client-go/rest"
 )

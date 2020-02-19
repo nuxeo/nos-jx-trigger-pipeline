@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jenkins-x-labs/tp/pkg/cmd"
-	"github.com/jenkins-x-labs/tp/pkg/jenkinsutil/fake"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/cmd"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/fake"
 	"github.com/jenkins-x/jx/pkg/gits"
 	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/require"
