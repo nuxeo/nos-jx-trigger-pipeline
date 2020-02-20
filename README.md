@@ -15,13 +15,13 @@ Download the binary and put it on your `$PATH` or use the trigger-pipeline conta
 To trigger a pipeline in the default Jenkins server:
 
 ``` 
-tp
+tp trigger
 ```
 
 If you have multiple Jenkins server custom resources in the current namespace then specify the Jenkins custom resource name on the command line:
 
 ``` 
-tp  --jenkins myJenkinsServer
+tp trigger  --jenkins myJenkinsServer
 ```
 
 If you are not sure what Jenkins names are available in the current namespace run:
@@ -41,13 +41,13 @@ To make it easier to configure inside pipelines you can specify the Jenkins inst
 
 ```   
 export TRIGGER_JENKINS_SERVER="someJenkinsCrdName"
-tp
+tp trigger
 ```
  
 For more information type: 
 
 ``` 
-tp --help
+tp trigger --help
 ```       
 
 ## How it works

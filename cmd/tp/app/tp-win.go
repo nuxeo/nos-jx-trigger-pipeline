@@ -5,14 +5,12 @@ package app
 import (
 	"os"
 	"syscall"
-
-	"github.com/jenkins-x-labs/trigger-pipeline/pkg/cmd"
 )
 
 // Run runs the command, if args are not nil they will be set on the command
 func Run(args []string) error {
 	configureTerminalForAnsiEscapes()
-	cmd := cmd.NewCmdTriggerPipeline()
+	cmd := cmd.NewCmd()
 	if len(args) > 0 {
 		args = args[1:]
 		cmd.SetArgs(args)

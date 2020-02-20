@@ -1,4 +1,4 @@
-package cmd
+package trigger
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/helpers"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/factory"
@@ -24,8 +25,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TriggerPipelineOptions contains the command line arguments for this command
-type TriggerPipelineOptions struct {
+// TriggerOptions contains the command line arguments for this command
+type TriggerOptions struct {
 	jenkinsutil.JenkinsOptions
 
 	MultiBranchProject bool
@@ -47,38 +48,38 @@ var (
 `)
 )
 
-// NewCmdTriggerPipeline creates the new command
-func NewCmdTriggerPipeline() *cobra.Command {
-	options := TriggerPipelineOptions{}
+// NewCmdTrigger creates the new command
+func NewCmdTrigger() (*cobra.Command, *TriggerOptions) {
+	o := &TriggerOptions{}
 	cmd := &cobra.Command{
-		Use:     "tp",
+		Use:     "trigger",
 		Short:   "triggers the Jenkinsfile in the current directory in a Jenkins server installed via the Jenkins Operator",
 		Long:    stepCustomPipelineLong,
 		Example: stepCustomPipelineExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			setLoggingLevel(cmd)
-			err := options.Run()
+			common.SetLoggingLevel(cmd)
+			err := o.Run()
 			helper.CheckErr(err)
 		},
 	}
-	cmd.Flags().BoolVarP(&options.MultiBranchProject, "multi-branch-project", "", false, "Use a Multi Branch Project in Jenkins")
-	cmd.Flags().StringVarP(&options.Dir, "dir", "d", ".", "the directory to look for the Jenkisnfile inside")
-	cmd.Flags().StringVarP(&options.Jenkinsfile, "jenkinsfile", "f", jenkinsfile.Name, "The name of the Jenkinsfile to use")
-	cmd.Flags().StringVarP(&options.JenkinsPath, "jenkins-path", "p", "", "The Jenkins folder path to create the pipeline inside. If not specified it defaults to the git 'owner/repoName/branch'")
-	cmd.Flags().StringVarP(&options.JenkinsSelector.DevelopmentJenkinsURL, "dev-jenkins-url", "", "", "Specifies a local URL to access the jenkins server if you are not running this command inside a Kubernetes cluster and don't have Ingress resosurces for the Jenkins server and so cannot use Kubernetes Service discovery. E.g. could be 'http://localhost:8080' if you are using: kubectl port-forward jenkins-server1 8080:8080")
+	cmd.Flags().BoolVarP(&o.MultiBranchProject, "multi-branch-project", "", false, "Use a Multi Branch Project in Jenkins")
+	cmd.Flags().StringVarP(&o.Dir, "dir", "d", ".", "the directory to look for the Jenkisnfile inside")
+	cmd.Flags().StringVarP(&o.Jenkinsfile, "jenkinsfile", "f", jenkinsfile.Name, "The name of the Jenkinsfile to use")
+	cmd.Flags().StringVarP(&o.JenkinsPath, "jenkins-path", "p", "", "The Jenkins folder path to create the pipeline inside. If not specified it defaults to the git 'owner/repoName/branch'")
+	cmd.Flags().StringVarP(&o.JenkinsSelector.DevelopmentJenkinsURL, "dev-jenkins-url", "", "", "Specifies a local URL to access the jenkins server if you are not running this command inside a Kubernetes cluster and don't have Ingress resosurces for the Jenkins server and so cannot use Kubernetes Service discovery. E.g. could be 'http://localhost:8080' if you are using: kubectl port-forward jenkins-server1 8080:8080")
 
-	options.JenkinsSelector.AddFlags(cmd)
+	o.JenkinsSelector.AddFlags(cmd)
 
 	defaultBatchMode := false
 	if os.Getenv("JX_BATCH_MODE") == "true" {
 		defaultBatchMode = true
 	}
-	cmd.PersistentFlags().BoolVarP(&options.BatchMode, "batch-mode", "b", defaultBatchMode, "Runs in batch mode without prompting for user input")
-	return cmd
+	cmd.PersistentFlags().BoolVarP(&o.BatchMode, "batch-mode", "b", defaultBatchMode, "Runs in batch mode without prompting for user input")
+	return cmd, o
 }
 
 // Run implements the command
-func (o *TriggerPipelineOptions) Run() error {
+func (o *TriggerOptions) Run() error {
 	var err error
 	o.ClientFactory, err = factory.NewClientFactory()
 	if err != nil {
@@ -118,7 +119,7 @@ func (o *TriggerPipelineOptions) Run() error {
 }
 
 // TriggerPipeline triggers the pipeline after the main service clients are created
-func (o *TriggerPipelineOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, gitInfo *gits.GitRepository, branch string) error {
+func (o *TriggerOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, gitInfo *gits.GitRepository, branch string) error {
 	jenkinsfileName := filepath.Join(o.Dir, o.Jenkinsfile)
 	exists, err := util.FileExists(jenkinsfileName)
 	if err != nil {

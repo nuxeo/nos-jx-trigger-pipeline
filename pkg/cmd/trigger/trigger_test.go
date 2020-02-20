@@ -1,10 +1,10 @@
-package cmd_test
+package trigger_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jenkins-x-labs/trigger-pipeline/pkg/cmd"
+	"github.com/jenkins-x-labs/trigger-pipeline/pkg/cmd/trigger"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/fake"
 	"github.com/jenkins-x/jx/pkg/gits"
 	"github.com/magiconair/properties/assert"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestTriggerPipeline(t *testing.T) {
-	o := cmd.TriggerPipelineOptions{}
+	o := trigger.TriggerOptions{}
 
 	jenkinsClient := &fake.FakeClient{}
 	branch := "master"
