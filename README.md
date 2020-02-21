@@ -1,6 +1,6 @@
 # Trigger Pipeline
 
-[![Documentation](https://godoc.org/github.com/jenkins-x-labs/trigger-pipeline?status.svg)](http://godoc.org/github.com/jenkins-x-labs/trigger-pipeline)
+[![Documentation](https://godoc.org/github.com/jenkins-x-labs/trigger-pipeline?status.svg)](https://pkg.go.dev/mod/github.com/jenkins-x-labs/trigger-pipeline)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jenkins-x-labs/trigger-pipeline)](https://goreportcard.com/report/github.com/jenkins-x-labs/trigger-pipeline)
 
 This project creates a small stand alone binary and container image for triggering pipelines in remove [Jenkins](https://jenkins.io/) servers.
