@@ -70,6 +70,9 @@ func (o *DeleteOptions) Run() error {
 	o.ClientFactory.Batch = o.BatchMode
 
 	m, names, err := jenkinsutil.FindJenkinsServers(o.ClientFactory, nil)
+	if err != nil {
+		return err
+	}
 
 	name := o.Name
 	if name != "" {
