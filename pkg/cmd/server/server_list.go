@@ -22,12 +22,12 @@ type ListOptions struct {
 }
 
 var (
-	stepCustomPipelineLong = templates.LongDesc(`
+	listLong = templates.LongDesc(`
 		This command lists all the known Jenkins servers in the current namespace
 
 `)
 
-	stepCustomPipelineExample = templates.Examples(`
+	listExample = templates.Examples(`
 		# list the available jenkins servers in the current namespace
 		tp server list
 `)
@@ -39,8 +39,8 @@ func NewCmdList() (*cobra.Command, *ListOptions) {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "lists the Jenkins servers for the current namespace",
-		Long:    stepCustomPipelineLong,
-		Example: stepCustomPipelineExample,
+		Long:    listLong,
+		Example: listExample,
 		Aliases: []string{"ls"},
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)
@@ -50,11 +50,7 @@ func NewCmdList() (*cobra.Command, *ListOptions) {
 	}
 	o.JenkinsSelector.AddFlags(cmd)
 
-	defaultBatchMode := false
-	if os.Getenv("JX_BATCH_MODE") == "true" {
-		defaultBatchMode = true
-	}
-	cmd.PersistentFlags().BoolVarP(&o.BatchMode, "batch-mode", "b", defaultBatchMode, "Runs in batch mode without prompting for user input")
+	cmd.PersistentFlags().BoolVarP(&o.BatchMode, "batch-mode", "b", false, "Runs in batch mode without prompting for user input")
 	return cmd, o
 }
 
@@ -68,7 +64,7 @@ func (o *ListOptions) Run() error {
 	o.ClientFactory.Batch = o.BatchMode
 	o.ClientFactory.DevelopmentJenkinsURL = o.JenkinsSelector.DevelopmentJenkinsURL
 
-	names, err := o.GetJenkinsServiceNames(&o.JenkinsSelector)
+	m, names, err := jenkinsutil.FindJenkinsServers(o.ClientFactory, &o.JenkinsSelector)
 	if err != nil {
 		return err
 	}
@@ -78,10 +74,13 @@ func (o *ListOptions) Run() error {
 	}
 
 	t := table.CreateTable(os.Stdout)
-	t.AddRow("NAME")
+	t.AddRow("NAME", "URL")
 
 	for _, name := range names {
-		t.AddRow(name)
+		jsvc := m[name]
+		if jsvc != nil {
+			t.AddRow(name, jsvc.URL)
+		}
 	}
 
 	t.Render()

@@ -7,6 +7,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
+	gopkg.in/AlecAivazis/survey.v1 v1.8.3
 	k8s.io/api v0.0.0-20190718183219-b59d8169aab5
 	k8s.io/apimachinery v0.0.0-20190703205208-4cfb76a8bf76
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible

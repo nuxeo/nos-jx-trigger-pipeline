@@ -90,12 +90,14 @@ func (f *ClientFactory) createJenkinsAuth(jenkinsServiceName string) (*gojenkins
 		err = nil
 	}
 	if secret != nil {
-		f.populateAuth(userAuth, secret)
+		return PopulateAuth(secret), nil
 	}
 	return userAuth, err
 }
 
-func (f *ClientFactory) populateAuth(userAuth *gojenkins.Auth, secret *v1.Secret) {
+// PopulateAuth populates the gojenkins Auth
+func PopulateAuth(secret *v1.Secret) *gojenkins.Auth {
+	userAuth := &gojenkins.Auth{}
 	if userAuth.Username == "" {
 		userAuth.Username = string(secret.Data[kube.JenkinsAdminUserField])
 	}
@@ -113,6 +115,7 @@ func (f *ClientFactory) populateAuth(userAuth *gojenkins.Auth, secret *v1.Secret
 	if userAuth.ApiToken == "" {
 		userAuth.ApiToken = string(secret.Data["token"])
 	}
+	return userAuth
 }
 
 func (f *ClientFactory) createJenkinsURL(jenkinsServiceName string) (string, error) {

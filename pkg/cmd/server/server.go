@@ -19,6 +19,8 @@ func NewCmdServer() *cobra.Command {
 			}
 		},
 	}
+	command.AddCommand(common.SplitCommand(NewCmdAdd()))
+	command.AddCommand(common.SplitCommand(NewCmdDelete()))
 	command.AddCommand(common.SplitCommand(NewCmdList()))
 	return command
 }

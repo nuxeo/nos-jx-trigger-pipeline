@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -14,11 +13,7 @@ import (
 	jxjenkins "github.com/jenkins-x/jx/pkg/jenkins"
 	"github.com/jenkins-x/jx/pkg/log"
 	"github.com/jenkins-x/jx/pkg/util"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 type JenkinsOptions struct {
@@ -40,18 +35,19 @@ type JenkinsSelectorOptions struct {
 	// Selector label selector to find the Jenkins Operator Services
 	Selector string
 
+	// NameLabel label the label to find the name of the Jenkins service
+	NameLabel string
+
 	// DevelopmentJenkinsURL a local URL to use to talk to the jenkins server if the servers do not have Ingress
 	// and you want to test out using the jenkins client locally
 	DevelopmentJenkinsURL string
-
-	// cached client
-	cachedCustomJenkinsClient gojenkins.JenkinsClient
 }
 
 // AddFlags add the command flags for picking a custom Jenkins App to work with
 func (o *JenkinsSelectorOptions) AddFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&o.JenkinsName, "jenkins", "", "", "The name of the Jenkin server provisioned by the Jenkins Operator")
-	cmd.Flags().StringVarP(&o.Selector, "selector", "", "app=jenkins-operator", "The kubernetes label selector to find the Jenkins Operator Services for Jenkins HTTP servers")
+	cmd.Flags().StringVarP(&o.Selector, "selector", "", JenkinsSelector, "The kubernetes label selector to find the Jenkins Operator Services for Jenkins HTTP servers")
+	cmd.Flags().StringVarP(&o.NameLabel, "name-label", "", JenkinsNameLabel, "The kubernetes label used to specify the Jenkins service name")
 }
 
 // GetAllPipelineJobNames returns all the pipeline job names
@@ -86,105 +82,61 @@ func (o *JenkinsOptions) CustomJenkinsClient(jenkinsServiceName string) (gojenki
 // or prompts the user to pick one if not in batch mode.
 func (o *JenkinsOptions) CreateJenkinsClientFromSelector(jenkinsSelector *JenkinsSelectorOptions) (gojenkins.JenkinsClient, error) {
 	var err error
-	jenkinsServiceName, err := o.PickCustomJenkinsName(jenkinsSelector, true)
+	_, jsvc, err := o.PickCustomJenkinsName(jenkinsSelector, true)
 	if err != nil {
 		return nil, err
 	}
-	jenkinsClient, err := o.CustomJenkinsClient(jenkinsServiceName)
-	if err == nil {
-		jenkinsSelector.cachedCustomJenkinsClient = jenkinsClient
-	}
-	return jenkinsClient, err
-}
 
-// JenkinsURLForSelector returns the default or the custom Jenkins URL
-func (o *JenkinsOptions) JenkinsURLForSelector(jenkinsSelector *JenkinsSelectorOptions, kubeClient kubernetes.Interface, ns string) (string, error) {
-	var err error
-	jenkinsServiceName, err := o.PickCustomJenkinsName(jenkinsSelector, true)
-	if err != nil {
-		return "", err
-	}
-	return o.ClientFactory.JenkinsURL(jenkinsServiceName)
+	return jsvc.CreateClient()
 }
 
 // PickCustomJenkinsName picks the name of a custom jenkins server App if available
-func (o *JenkinsOptions) PickCustomJenkinsName(jenkinsSelector *JenkinsSelectorOptions, failIfNone bool) (string, error) {
-	customJenkinsName := jenkinsSelector.JenkinsName
-	if customJenkinsName == "" {
-		names, err := o.GetJenkinsServiceNames(jenkinsSelector)
-		if err != nil {
-			return "", err
-		}
-
-		if o.BatchMode {
-			name := os.Getenv(TriggerJenkinsServerEnv)
-			if name != "" {
-				if util.StringArrayIndex(names, name) < 0 {
-					return "", fmt.Errorf("the $%s is %s but we can only find these Jenkins servers: %s", TriggerJenkinsServerEnv, name, strings.Join(names, ", "))
-				}
-				log.Logger().Infof("defaulting to Jenkins server %s due to $%s", util.ColorInfo(name), TriggerJenkinsServerEnv)
-				return name, nil
-			}
-		}
-
-		switch len(names) {
-		case 0:
-			if failIfNone {
-				return "", fmt.Errorf("No Jenkins services found")
-			}
-			return "", nil
-
-		case 1:
-			customJenkinsName = names[0]
-
-		default:
-			if o.BatchMode {
-				return "", util.MissingOptionWithOptions("jenkins", names)
-			}
-			customJenkinsName, err = util.PickName(names, "Pick which custom Jenkins App you wish to use: ", "Jenkins Apps are a way to add custom Jenkins servers into Jenkins X", o.GetIOFileHandles())
-			if err != nil {
-				return "", err
-			}
-		}
-	}
-	jenkinsSelector.JenkinsName = customJenkinsName
-	if customJenkinsName == "" {
-		return "", fmt.Errorf("failed to find a Jenkins server")
-	}
-	return customJenkinsName, nil
-}
-
-// GetJenkinsServiceNames returns the list of jenkins service names
-func (o *JenkinsOptions) GetJenkinsServiceNames(jenkinsSelector *JenkinsSelectorOptions) ([]string, error) {
-	kubeClient := o.ClientFactory.KubeClient
-	ns := o.ClientFactory.Namespace
-
-	serviceInterface := kubeClient.CoreV1().Services(ns)
-	selector := jenkinsSelector.Selector
-	serviceList, err := serviceInterface.List(metav1.ListOptions{
-		LabelSelector: selector,
-	})
+func (o *JenkinsOptions) PickCustomJenkinsName(jenkinsSelector *JenkinsSelectorOptions, failIfNone bool) (string, *JenkinsService, error) {
+	m, names, err := FindJenkinsServers(o.ClientFactory, jenkinsSelector)
 	if err != nil {
-		if !apierrors.IsNotFound(err) {
-			return nil, errors.Wrapf(err, "failed to list Jenkins services in namespace %s with selector %s", ns, selector)
+		return "", nil, err
+	}
+	name := jenkinsSelector.JenkinsName
+	if name != "" {
+		jsvc := m[name]
+		if jsvc == nil {
+			return "", nil, util.InvalidOption("jenkins", name, names)
+		}
+		return name, jsvc, nil
+	}
+
+	if o.BatchMode {
+		name := os.Getenv(TriggerJenkinsServerEnv)
+		if name != "" {
+			jsvc := m[name]
+			if jsvc == nil {
+				return "", nil, fmt.Errorf("the $%s is %s but we can only find these Jenkins servers: %s", TriggerJenkinsServerEnv, name, strings.Join(names, ", "))
+			}
+			log.Logger().Infof("defaulting to Jenkins server %s at %s due to $%s", util.ColorInfo(name), jsvc.URL, TriggerJenkinsServerEnv)
+			return name, jsvc, nil
 		}
 	}
 
-	names := []string{}
-	for _, svc := range serviceList.Items {
-		isHttp := false
-		for _, p := range svc.Spec.Ports {
-			if p.Port == 8080 {
-				isHttp = true
-				break
-			}
+	switch len(names) {
+	case 0:
+		if failIfNone {
+			return "", nil, fmt.Errorf("No Jenkins services found. Try: tp server add")
 		}
-		if isHttp {
-			names = append(names, svc.Name)
+		return "", nil, nil
+
+	case 1:
+		name = names[0]
+
+	default:
+		if o.BatchMode {
+			return "", nil, util.MissingOptionWithOptions("jenkins", names)
+		}
+		name, err = util.PickName(names, "Pick which Jenkins service you wish to use: ", "Add a Jenkins service via: tp server add", o.GetIOFileHandles())
+		if err != nil {
+			return "", nil, err
 		}
 	}
-	sort.Strings(names)
-	return names, nil
+	return name, m[name], nil
 }
 
 // GetJenkinsJobs returns the existing Jenkins jobs
