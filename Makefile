@@ -215,6 +215,9 @@ lint: ## Lint the code
 	./hack/linter.sh
 	./hack/generate.sh
 
+.PHONY: all
+all: fmt build lint test
+
 .PHONY: gcp
 gcp: linux ## Creates a GCP image the code
 	./build.sh

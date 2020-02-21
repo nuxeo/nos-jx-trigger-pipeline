@@ -19,6 +19,14 @@ type ListOptions struct {
 	jenkinsutil.JenkinsOptions
 
 	JenkinsSelector jenkinsutil.JenkinsSelectorOptions
+
+	Results ListResults
+}
+
+// ListResults the results of the operation
+type ListResults struct {
+	Names   []string
+	Servers map[string]*jenkinsutil.JenkinsServer
 }
 
 var (
@@ -74,6 +82,9 @@ func (o *ListOptions) Run() error {
 		log.Logger().Infof("No Jenkins Servers could be found. Please try %s to register one\n", util.ColorInfo("tp server add"))
 		return nil
 	}
+
+	o.Results.Names = names
+	o.Results.Servers = m
 
 	t := table.CreateTable(os.Stdout)
 	t.AddRow("NAME", "URL")
