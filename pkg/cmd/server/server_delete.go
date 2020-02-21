@@ -63,9 +63,11 @@ func NewCmdDelete() (*cobra.Command, *DeleteOptions) {
 // Run implements the command
 func (o *DeleteOptions) Run() error {
 	var err error
-	o.ClientFactory, err = factory.NewClientFactory()
-	if err != nil {
-		return err
+	if o.ClientFactory == nil {
+		o.ClientFactory, err = factory.NewClientFactory()
+		if err != nil {
+			return err
+		}
 	}
 	o.ClientFactory.Batch = o.BatchMode
 

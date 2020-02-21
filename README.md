@@ -50,22 +50,45 @@ For more information type:
 tp trigger --help
 ```       
 
+## Adding Jenkins Servers
+
+`trigger-pipeline` can automatically discover Jenkins servers created via the [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/).
+
+In addition you can register any Jenkins servers you wish to the Jenkins Server Registry via the `tp server add` command.
+
+To add a new Jenkins server with a guided wizard:
+
+```
+tp server add 
+```
+
+If you already know the name, URL, username and API Token then you can use:
+
+```
+tp server add 
+```
+
+### Removing Jenkins Servers
+
+You can remove a Jenkins server via:
+
+``` 
+tp server remove
+```
+
+Note that this only removes it from the registry; it doesn't affect the actual Jenkins Server.
+
+## Listing the available Jenkins Servers
+
+To list the servers you can use try:
+
+``` 
+tp server list
+```
+
 ## How it works
 
-Under the covers the `trigger-pipeline` process uses Kubernetes Selectors to find Jenkins `Service` and `Secret` resources created by the [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/) when it provisions a Jenkins server pod as a result of a `Jenkins` custom resource being created. 
-
-You can view the Jenkins custom resources in your namespace via:
-
-``` 
-kubectl get jenkins
-```
-
-The default selector used by the [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/) is `app=jenkins-operator`. So you can view what Jenkins `Services` / `Secrets` will be used via:
-
-``` 
-kubectl get svc -l app=jenkins-operator
-kubectl get secret -l app=jenkins-operator
-```
+To maintain a registry of Jenkins Servers `trigger-pipeline` uses a Kubernetes `Secret` for each Jenkins Server with details of the URL, username and API Token 
 
 ## Known issues
 

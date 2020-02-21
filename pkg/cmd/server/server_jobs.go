@@ -67,6 +67,9 @@ func (o *JobsOptions) Run() error {
 	o.ClientFactory.DevelopmentJenkinsURL = o.JenkinsSelector.DevelopmentJenkinsURL
 
 	jobs, err := o.GetJenkinsJobs(&o.JenkinsSelector, o.Filter)
+	if err != nil {
+		return err
+	}
 
 	names := []string{}
 	for k := range jobs {

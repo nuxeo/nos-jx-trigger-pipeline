@@ -22,7 +22,6 @@ type JenkinsOptions struct {
 	BatchMode     bool
 	IOFileHandles *util.IOFileHandles
 	git           gits.Gitter
-	jenkinsClient gojenkins.JenkinsClient
 }
 
 // JenkinsSelectorOptions used to represent the options used to refer to a Jenkins.
@@ -66,11 +65,6 @@ func (o *JenkinsOptions) GetAllPipelineJobNames(jenkinsClient gojenkins.JenkinsC
 		}
 	}
 	return nil
-}
-
-// SetJenkinsClient sets the JenkinsClient - usually used in testing
-func (o *JenkinsOptions) SetJenkinsClient(jenkinsClient gojenkins.JenkinsClient) {
-	o.jenkinsClient = jenkinsClient
 }
 
 // CreateJenkinsClientFromSelector is given either a specific jenkins service name to use, uses the selector to find it
