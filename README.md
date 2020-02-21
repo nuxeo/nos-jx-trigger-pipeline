@@ -90,7 +90,7 @@ tp server list
 
 To maintain a registry of Jenkins Servers `trigger-pipeline` uses a Kubernetes `Secret` for each Jenkins Server with details of the URL, username and API Token 
 
-## Known issues
+## Known issues
 
 If you see this error when trying to trigger a pipeline:
 
