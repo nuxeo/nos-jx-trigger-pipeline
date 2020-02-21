@@ -66,3 +66,13 @@ The default selector used by the [Jenkins Operator](https://jenkinsci.github.io/
 kubectl get svc -l app=jenkins-operator
 kubectl get secret -l app=jenkins-operator
 ```
+
+## Known issues
+
+If you see this error when trying to trigger a pipeline:
+
+``` 
+403 No valid crumb was included in the request
+```
+
+Then until we figure out a better workaround you need to go into `Manage Jenkins` -> `Configure Global Security` then make sure you uncheck `Prevent Cross Site Request Forgery exploits` 

@@ -112,13 +112,19 @@ func (o *AddOptions) populateJenkinsService(j *jenkinsutil.JenkinsService) error
 		}
 	}
 	if j.Auth.Username == "" {
-		j.Auth.Username, err = util.PickValue("user name used to access Jenkins:", "", true,
+		j.Auth.Username, err = util.PickValue("user name used to access Jenkins:", "admin", true,
 			"we need the username to be used when accessing the remote Jenkins", handles)
 		if err != nil {
 			return err
 		}
 	}
 	if j.Auth.ApiToken == "" {
+		tokenURL := jenkinsTokenURL(j.URL)
+		log.Logger().Infof("\nPlease go to %s to generate the API token:\n", util.ColorInfo(tokenURL))
+		log.Logger().Infof("click the %s button\n", util.ColorInfo("Add new Token"))
+		log.Logger().Infof("click the %s button\n", util.ColorInfo("Generate"))
+		log.Logger().Infof("Then COPY the token and enter in into the form below:\n\n")
+
 		j.Auth.ApiToken, err = util.PickPassword("API token used to access Jenkins:",
 			"we need the API token to be used when accessing the remote Jenkins", handles)
 		if err != nil {
@@ -171,8 +177,10 @@ func (o *AddOptions) createJenkinsService(j *jenkinsutil.JenkinsService) error {
 			return errors.Wrapf(err, "failed to create Secret %s in namespace %s", secretsName, ns)
 		}
 	}
-
 	log.Logger().Infof("saved Jenkins server into Secret %s", util.ColorInfo(secretsName))
 	return nil
+}
 
+func jenkinsTokenURL(url string) string {
+	return util.UrlJoin(url, "/me/configure")
 }

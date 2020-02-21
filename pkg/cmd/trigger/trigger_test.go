@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTriggerPipeline(t *testing.T) {
-	o := trigger.TriggerOptions{}
+func TestTrigger(t *testing.T) {
+	_, o := trigger.NewCmdTrigger()
 
 	jenkinsClient := &fake.FakeClient{}
 	branch := "master"

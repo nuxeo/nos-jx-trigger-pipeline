@@ -1,11 +1,9 @@
 package jenkinsutil
 
 import (
-	"net/http"
 	"sort"
 
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
-	gojenkins "github.com/jenkins-x/golang-jenkins"
 	"github.com/jenkins-x/jx/pkg/log"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -20,33 +18,6 @@ var (
 		NameLabel: JenkinsNameLabel,
 	}
 )
-
-// JenkinsService represents a jenkins server discovered via Service selectors or via the
-// trigger-pipeline secrets
-type JenkinsService struct {
-	// Name the name of the Jenkins server in the registry. Should be a valid kubernetes name
-	Name string
-
-	// URL the URL to connect to the Jenkins server
-	URL string
-
-	// SecretName the name of the Secret in the registry
-	SecretName string
-
-	// Auth the username and token used to access the Jenkins server
-	Auth gojenkins.Auth
-}
-
-// CreateClient creates a Jenkins client for a jenkins service
-func (j *JenkinsService) CreateClient() (gojenkins.JenkinsClient, error) {
-	jenkins := gojenkins.NewJenkins(&j.Auth, j.URL)
-	httpClient := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}}
-	jenkins.SetHTTPClient(httpClient)
-	return jenkins, nil
-}
 
 // FindJenkinsServers discovers the jenkins services
 func FindJenkinsServers(f *ClientFactory, jenkinsSelector *JenkinsSelectorOptions) (map[string]*JenkinsService, []string, error) {
