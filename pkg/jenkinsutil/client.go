@@ -2,9 +2,7 @@ package jenkinsutil
 
 import (
 	"fmt"
-	"net/http"
 	"net/url"
-	"strings"
 
 	gojenkins "github.com/jenkins-x/golang-jenkins"
 	"github.com/jenkins-x/jx/pkg/kube"
@@ -13,8 +11,6 @@ import (
 	"github.com/jenkins-x/jx/pkg/util"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
 	// this is so that we load the auth plugins so we can connect to, say, GCP
@@ -31,23 +27,18 @@ type ClientFactory struct {
 }
 
 // CreateJenkinsClient creates a new Jenkins client for the given custom Jenkins App
-func (f *ClientFactory) CreateJenkinsClient(jenkinsServiceName string) (gojenkins.JenkinsClient, error) {
-	auth, err := f.createJenkinsAuth(jenkinsServiceName)
+func (f *ClientFactory) CreateJenkinsClient(jenkinsName string) (gojenkins.JenkinsClient, error) {
+	selector := DefaultJenkinsSelector
+	selector.JenkinsName = jenkinsName
+	m, names, err := FindJenkinsServers(f, &selector)
 	if err != nil {
 		return nil, err
 	}
-	u, err := f.createJenkinsURL(jenkinsServiceName)
-	if err != nil {
-		return nil, err
+	jsvc := m[jenkinsName]
+	if jsvc != nil {
+		return jsvc.CreateClient()
 	}
-	log.Logger().Infof("using Jenkins server %s", util.ColorInfo(u))
-	jenkins := gojenkins.NewJenkins(auth, u)
-	httpClient := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}}
-	jenkins.SetHTTPClient(httpClient)
-	return jenkins, nil
+	return nil, util.InvalidOption("jenkins", jenkinsName, names)
 }
 
 // JenkinsURL gets a given jenkins service's URL
@@ -73,26 +64,6 @@ func (f *ClientFactory) JenkinsURL(jenkinsServiceName string) (string, error) {
 		return "", fmt.Errorf("%s in namespace %s", err, ns)
 	}
 	return url, err
-}
-
-func (f *ClientFactory) createJenkinsAuth(jenkinsServiceName string) (*gojenkins.Auth, error) {
-	userAuth := &gojenkins.Auth{}
-
-	// lets try find the jenkins operator secret
-	secretName := jenkinsServiceName
-	joprefix := "jenkins-operator-http-"
-	if strings.HasPrefix(secretName, joprefix) {
-		secretName = "jenkins-operator-credentials-" + jenkinsServiceName[len(joprefix):]
-	}
-
-	secret, err := f.KubeClient.CoreV1().Secrets(f.Namespace).Get(secretName, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		err = nil
-	}
-	if secret != nil {
-		return PopulateAuth(secret), nil
-	}
-	return userAuth, err
 }
 
 // PopulateAuth populates the gojenkins Auth

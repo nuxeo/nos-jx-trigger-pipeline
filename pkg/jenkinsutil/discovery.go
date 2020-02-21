@@ -20,7 +20,7 @@ var (
 )
 
 // FindJenkinsServers discovers the jenkins services
-func FindJenkinsServers(f *ClientFactory, jenkinsSelector *JenkinsSelectorOptions) (map[string]*JenkinsService, []string, error) {
+func FindJenkinsServers(f *ClientFactory, jenkinsSelector *JenkinsSelectorOptions) (map[string]*JenkinsServer, []string, error) {
 	m, err := findServersBySelector(f, jenkinsSelector)
 	if err != nil {
 		return nil, nil, err
@@ -44,8 +44,8 @@ func FindJenkinsServers(f *ClientFactory, jenkinsSelector *JenkinsSelectorOption
 }
 
 // findFromSecretRegistry discovers the Trigger Pipeline Secrets
-func findFromSecretRegistry(f *ClientFactory) (map[string]*JenkinsService, error) {
-	m := map[string]*JenkinsService{}
+func findFromSecretRegistry(f *ClientFactory) (map[string]*JenkinsServer, error) {
+	m := map[string]*JenkinsServer{}
 	kubeClient := f.KubeClient
 	ns := f.Namespace
 
@@ -68,7 +68,7 @@ func findFromSecretRegistry(f *ClientFactory) (map[string]*JenkinsService, error
 					u = secret.Annotations[common.JenkinsURLAnnotation]
 				}
 				auth := PopulateAuth(&secret)
-				m[name] = &JenkinsService{
+				m[name] = &JenkinsServer{
 					Name:       name,
 					URL:        u,
 					SecretName: secret.Name,
@@ -81,8 +81,8 @@ func findFromSecretRegistry(f *ClientFactory) (map[string]*JenkinsService, error
 }
 
 // findServersBySelector discovers the jenkins services
-func findServersBySelector(f *ClientFactory, jenkinsSelector *JenkinsSelectorOptions) (map[string]*JenkinsService, error) {
-	m := map[string]*JenkinsService{}
+func findServersBySelector(f *ClientFactory, jenkinsSelector *JenkinsSelectorOptions) (map[string]*JenkinsServer, error) {
+	m := map[string]*JenkinsServer{}
 	if jenkinsSelector == nil {
 		return m, nil
 	}
@@ -131,7 +131,7 @@ func findServersBySelector(f *ClientFactory, jenkinsSelector *JenkinsSelectorOpt
 	return m, nil
 }
 
-func createJenkinsServiceFromSelector(f *ClientFactory, svc corev1.Service, secrets *corev1.SecretList, jenkinsSelector *JenkinsSelectorOptions) (string, *JenkinsService, error) {
+func createJenkinsServiceFromSelector(f *ClientFactory, svc corev1.Service, secrets *corev1.SecretList, jenkinsSelector *JenkinsSelectorOptions) (string, *JenkinsServer, error) {
 	name := ""
 	if svc.Labels != nil {
 		name = svc.Labels[jenkinsSelector.NameLabel]
@@ -154,7 +154,7 @@ func createJenkinsServiceFromSelector(f *ClientFactory, svc corev1.Service, secr
 		if labels != nil {
 			if labels[jenkinsSelector.NameLabel] == name {
 				auth := PopulateAuth(&sec)
-				return name, &JenkinsService{
+				return name, &JenkinsServer{
 					Name: name,
 					URL:  u,
 					Auth: *auth,

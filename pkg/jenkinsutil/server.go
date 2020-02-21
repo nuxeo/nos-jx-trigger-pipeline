@@ -7,9 +7,9 @@ import (
 	gojenkins "github.com/jenkins-x/golang-jenkins"
 )
 
-// JenkinsService represents a jenkins server discovered via Service selectors or via the
+// JenkinsServer represents a jenkins server discovered via Service selectors or via the
 // trigger-pipeline secrets
-type JenkinsService struct {
+type JenkinsServer struct {
 	// Name the name of the Jenkins server in the registry. Should be a valid kubernetes name
 	Name string
 
@@ -24,7 +24,7 @@ type JenkinsService struct {
 }
 
 // CreateClient creates a Jenkins client for a jenkins service
-func (j *JenkinsService) CreateClient() (gojenkins.JenkinsClient, error) {
+func (j *JenkinsServer) CreateClient() (gojenkins.JenkinsClient, error) {
 	// lets trim trailing slashes to avoid the client using a // in the generated URLs
 	u := strings.TrimSuffix(j.URL, "/")
 	jenkins := gojenkins.NewJenkins(&j.Auth, u)

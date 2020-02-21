@@ -73,11 +73,6 @@ func (o *JenkinsOptions) SetJenkinsClient(jenkinsClient gojenkins.JenkinsClient)
 	o.jenkinsClient = jenkinsClient
 }
 
-// CustomJenkinsClient returns the Jenkins client for the custom jenkins app
-func (o *JenkinsOptions) CustomJenkinsClient(jenkinsServiceName string) (gojenkins.JenkinsClient, error) {
-	return o.ClientFactory.CreateJenkinsClient(jenkinsServiceName)
-}
-
 // CreateJenkinsClientFromSelector is given either a specific jenkins service name to use, uses the selector to find it
 // or prompts the user to pick one if not in batch mode.
 func (o *JenkinsOptions) CreateJenkinsClientFromSelector(jenkinsSelector *JenkinsSelectorOptions) (gojenkins.JenkinsClient, error) {
@@ -91,7 +86,7 @@ func (o *JenkinsOptions) CreateJenkinsClientFromSelector(jenkinsSelector *Jenkin
 }
 
 // PickCustomJenkinsName picks the name of a custom jenkins server App if available
-func (o *JenkinsOptions) PickCustomJenkinsName(jenkinsSelector *JenkinsSelectorOptions, failIfNone bool) (string, *JenkinsService, error) {
+func (o *JenkinsOptions) PickCustomJenkinsName(jenkinsSelector *JenkinsSelectorOptions, failIfNone bool) (string, *JenkinsServer, error) {
 	m, names, err := FindJenkinsServers(o.ClientFactory, jenkinsSelector)
 	if err != nil {
 		return "", nil, err

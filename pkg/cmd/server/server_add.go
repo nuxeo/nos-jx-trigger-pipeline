@@ -20,7 +20,7 @@ import (
 type AddOptions struct {
 	jenkinsutil.JenkinsOptions
 
-	JenkinsService jenkinsutil.JenkinsService
+	JenkinsService jenkinsutil.JenkinsServer
 }
 
 var (
@@ -78,7 +78,7 @@ func (o *AddOptions) Run() error {
 	return o.createJenkinsService(j)
 }
 
-func (o *AddOptions) populateJenkinsService(j *jenkinsutil.JenkinsService) error {
+func (o *AddOptions) populateJenkinsService(j *jenkinsutil.JenkinsServer) error {
 	if o.BatchMode {
 		if j.Name == "" {
 			return util.MissingOption("name")
@@ -134,7 +134,7 @@ func (o *AddOptions) populateJenkinsService(j *jenkinsutil.JenkinsService) error
 	return nil
 }
 
-func (o *AddOptions) createJenkinsService(j *jenkinsutil.JenkinsService) error {
+func (o *AddOptions) createJenkinsService(j *jenkinsutil.JenkinsServer) error {
 	j.Name = naming.ToValidName(j.Name)
 	secretsName := "tp-" + j.Name
 
