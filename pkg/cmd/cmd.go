@@ -21,6 +21,9 @@ func NewCmd() *cobra.Command {
 		},
 	}
 	cmd.AddCommand(common.SplitCommand(trigger.NewCmdTrigger()))
-	cmd.AddCommand(server.NewCmdServer())
+	cmd.AddCommand(common.SplitCommand(server.NewCmdAdd()))
+	cmd.AddCommand(common.SplitCommand(server.NewCmdDelete()))
+	cmd.AddCommand(common.SplitCommand(server.NewCmdJobs()))
+	cmd.AddCommand(common.SplitCommand(server.NewCmdList()))
 	return cmd
 }
