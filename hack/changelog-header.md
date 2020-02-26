@@ -2,7 +2,7 @@
 
 ```shell
 curl -L https://github.com/jenkins-x-labs/trigger-pipeline/releases/download/v{{.Version}}/tp-linux-amd64.tar.gz | tar xzv 
-sudo mv helmboot /usr/local/bin
+sudo mv tp /usr/local/bin
 ```
 
 ### macOS
