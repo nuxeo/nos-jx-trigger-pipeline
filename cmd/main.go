@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/jenkins-x-labs/trigger-pipeline/cmd/tp/app"
+	"github.com/jenkins-x-labs/trigger-pipeline/cmd/app"
 )
 
 // Entrypoint for the command

@@ -2,6 +2,9 @@
 
 [![Documentation](https://godoc.org/github.com/jenkins-x-labs/trigger-pipeline?status.svg)](https://pkg.go.dev/mod/github.com/jenkins-x-labs/trigger-pipeline)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jenkins-x-labs/trigger-pipeline)](https://goreportcard.com/report/github.com/jenkins-x-labs/trigger-pipeline)
+[![Releases](https://img.shields.io/github/release-pre/jenkins-x-labs/trigger-pipeline.svg)](https://github.com/jenkins-x-labs/trigger-pipeline/releases)
+[![LICENSE](https://img.shields.io/github/license/jenkins-x-labs/trigger-pipeline.svg)](https://github.com/jenkins-x-labs/trigger-pipeline/blob/master/LICENSE)
+[![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://slack.k8s.io/)
 
 This project creates a small stand alone binary and container image for triggering pipelines in remove [Jenkins](https://jenkins.io/) servers.
 
