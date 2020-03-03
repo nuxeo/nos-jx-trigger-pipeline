@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"sort"
 
@@ -30,7 +31,7 @@ var (
 
 	jobsExample = templates.Examples(`
 		# list the jobs in a Jenkins server
-		tp server jobs
+		%s server jobs
 `)
 )
 
@@ -41,7 +42,7 @@ func NewCmdJobs() (*cobra.Command, *JobsOptions) {
 		Use:     "jobs",
 		Short:   "lists the Jobs in a given Jenkins server",
 		Long:    jobsLong,
-		Example: jobsExample,
+		Example: fmt.Sprintf(jobsExample, common.BinaryName),
 		Aliases: []string{"job"},
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)

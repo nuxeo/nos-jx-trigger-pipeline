@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
@@ -37,7 +38,7 @@ var (
 
 	listExample = templates.Examples(`
 		# list the available jenkins servers in the current namespace
-		tp server list
+		%s server list
 `)
 )
 
@@ -48,7 +49,7 @@ func NewCmdList() (*cobra.Command, *ListOptions) {
 		Use:     "list",
 		Short:   "lists the Jenkins servers for the current namespace",
 		Long:    listLong,
-		Example: listExample,
+		Example: fmt.Sprintf(listExample, common.BinaryName),
 		Aliases: []string{"ls"},
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)

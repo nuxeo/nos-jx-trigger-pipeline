@@ -10,6 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// BinaryName the binary name to use in help docs
+var BinaryName string
+
+// TopLevelCommand the top level command name
+var TopLevelCommand string
+
+func init() {
+	BinaryName = os.Getenv("BINARY_NAME")
+	if BinaryName == "" {
+		BinaryName = "tp"
+	}
+	TopLevelCommand = os.Getenv("TOP_LEVEL_COMMAND")
+	if TopLevelCommand == "" {
+		TopLevelCommand = "tp"
+	}
+}
+
 func SetLoggingLevel(cmd *cobra.Command) {
 	verbose := false
 	flag := cmd.Flag(opts.OptionVerbose)

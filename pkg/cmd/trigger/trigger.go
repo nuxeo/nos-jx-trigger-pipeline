@@ -37,14 +37,14 @@ type TriggerOptions struct {
 }
 
 var (
-	stepCustomPipelineLong = templates.LongDesc(`
-		This command triggers the Jenkinsfile in the current directory in a Jenkins server installed via the Jenkins Operator
+	triggerLong = templates.LongDesc(`
+		This command triggers the Jenkinsfile in the current directory in a Jenkins server
 
 `)
 
-	stepCustomPipelineExample = templates.Examples(`
-		# triggers the Jenkinsfile in the current directory in a Jenkins server installed via the Jenkins Operator
-		tp
+	triggerExample = templates.Examples(`
+		# triggers the Jenkinsfile in the current directory in a Jenkins server 
+		%s
 `)
 )
 
@@ -54,8 +54,8 @@ func NewCmdTrigger() (*cobra.Command, *TriggerOptions) {
 	cmd := &cobra.Command{
 		Use:     "trigger",
 		Short:   "triggers the Jenkinsfile in the current directory in a Jenkins server installed via the Jenkins Operator",
-		Long:    stepCustomPipelineLong,
-		Example: stepCustomPipelineExample,
+		Long:    triggerLong,
+		Example: fmt.Sprintf(triggerExample, common.BinaryName),
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)
 			err := o.Run()

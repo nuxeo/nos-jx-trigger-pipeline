@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/factory"
@@ -31,7 +33,7 @@ var (
 
 	addExample = templates.Examples(`
 		# adds a new Jenkins server to the registry of Jenkins servers so it can be used to trigger pipelines
-		tp server add
+		%s server add
 `)
 )
 
@@ -42,7 +44,7 @@ func NewCmdAdd() (*cobra.Command, *AddOptions) {
 		Use:     "add",
 		Short:   "adds a new Jenkins server to the registry of Jenkins servers",
 		Long:    addLong,
-		Example: addExample,
+		Example: fmt.Sprintf(addExample, common.BinaryName),
 		Aliases: []string{"create", "new"},
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)

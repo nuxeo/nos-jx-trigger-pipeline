@@ -31,10 +31,10 @@ var (
 
 	removeExample = templates.Examples(`
 		# removes a Jenkins server from the registry by picking the server to remove
-		tp server remove
+		%s server remove
 
 		# removes a specific named Jenkins server from the registry
-		tp server remove --name myserver
+		%s server remove --name myserver
 `)
 )
 
@@ -45,7 +45,7 @@ func NewCmdDelete() (*cobra.Command, *DeleteOptions) {
 		Use:     "delete",
 		Short:   "removes a new Jenkins server from the registry of Jenkins servers",
 		Long:    removeLong,
-		Example: removeExample,
+		Example: fmt.Sprintf(removeExample, common.BinaryName, common.BinaryName),
 		Aliases: []string{"rm", "remove"},
 		Run: func(cmd *cobra.Command, args []string) {
 			common.SetLoggingLevel(cmd)
