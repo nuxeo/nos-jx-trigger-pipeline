@@ -31,7 +31,7 @@ var (
 
 	jobsExample = templates.Examples(`
 		# list the jobs in a Jenkins server
-		%s server jobs
+		%s jobs
 `)
 )
 

@@ -33,7 +33,7 @@ var (
 
 	addExample = templates.Examples(`
 		# adds a new Jenkins server to the registry of Jenkins servers so it can be used to trigger pipelines
-		%s server add
+		%s add
 `)
 )
 

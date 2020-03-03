@@ -38,7 +38,7 @@ var (
 
 	listExample = templates.Examples(`
 		# list the available jenkins servers in the current namespace
-		%s server list
+		%s list
 `)
 )
 
