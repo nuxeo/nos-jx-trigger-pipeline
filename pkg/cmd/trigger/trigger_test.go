@@ -6,7 +6,7 @@ import (
 
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/cmd/trigger"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/fake"
-	"github.com/jenkins-x/jx/pkg/gits"
+	"github.com/jenkins-x/jx/v2/pkg/gits"
 	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/require"
 )

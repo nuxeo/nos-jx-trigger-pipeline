@@ -1,8 +1,10 @@
 module github.com/jenkins-x-labs/trigger-pipeline
 
+go 1.14
+
 require (
 	github.com/jenkins-x/golang-jenkins v0.0.0-20180919102630-65b83ad42314
-	github.com/jenkins-x/jx v1.3.981-0.20200605070345-2c10fe601319
+	github.com/jenkins-x/jx/v2 v2.1.56
 	github.com/magiconair/properties v1.8.0
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
@@ -33,5 +35,3 @@ replace github.com/Azure/azure-sdk-for-go => github.com/Azure/azure-sdk-for-go v
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v10.14.0+incompatible
 
 replace github.com/banzaicloud/bank-vaults => github.com/banzaicloud/bank-vaults v0.0.0-20190508130850-5673d28c46bd
-
-go 1.13

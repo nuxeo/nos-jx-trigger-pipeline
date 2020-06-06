@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jenkins-x/jx/pkg/log"
+	"github.com/jenkins-x/jx/v2/pkg/log"
 )
 
 // Retry executes a given function and reties 'attempts' times with a delay of 'sleep' between the executions

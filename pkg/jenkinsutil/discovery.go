@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
-	"github.com/jenkins-x/jx/pkg/log"
+	"github.com/jenkins-x/jx/v2/pkg/log"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

@@ -7,11 +7,11 @@ import (
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/common"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil"
 	"github.com/jenkins-x-labs/trigger-pipeline/pkg/jenkinsutil/factory"
-	"github.com/jenkins-x/jx/pkg/cmd/helper"
-	"github.com/jenkins-x/jx/pkg/cmd/templates"
-	"github.com/jenkins-x/jx/pkg/log"
-	"github.com/jenkins-x/jx/pkg/table"
-	"github.com/jenkins-x/jx/pkg/util"
+	"github.com/jenkins-x/jx/v2/pkg/cmd/helper"
+	"github.com/jenkins-x/jx/v2/pkg/cmd/templates"
+	"github.com/jenkins-x/jx/v2/pkg/log"
+	"github.com/jenkins-x/jx/v2/pkg/table"
+	"github.com/jenkins-x/jx/v2/pkg/util"
 	"github.com/spf13/cobra"
 )
 
