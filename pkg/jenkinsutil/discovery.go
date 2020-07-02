@@ -132,7 +132,7 @@ func findServersBySelector(f *ClientFactory, jenkinsSelector *JenkinsSelectorOpt
 }
 
 func createJenkinsServiceFromSelector(f *ClientFactory, svc corev1.Service, secrets *corev1.SecretList, jenkinsSelector *JenkinsSelectorOptions) (string, *JenkinsServer, error) {
-	name := ""
+	name := svc.Name
 	if svc.Labels != nil {
 		name = svc.Labels[jenkinsSelector.NameLabel]
 	}
@@ -143,7 +143,7 @@ func createJenkinsServiceFromSelector(f *ClientFactory, svc corev1.Service, secr
 		return "", nil, nil
 	}
 
-	u, err := f.createJenkinsURL(name)
+	u, err := f.createJenkinsURL(svc.Name)
 	if err != nil {
 		return name, nil, errors.Wrapf(err, "failed to find URL for Jenkins %s", name)
 	}

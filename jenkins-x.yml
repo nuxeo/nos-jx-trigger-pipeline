@@ -1,6 +1,14 @@
 buildPack: go-cli
 pipelineConfig:
   pipelines:
+    overrides:
+    - name: next-version
+      step:
+        image: gcr.io/build-jx-prod/jxlabs-nos/jxl
+        sh: ./next-version.sh
+    - name: tag-version
+      step:
+        sh: jx step tag --version \$(cat VERSION) --no-apply
     release:
       promote:
         steps:
