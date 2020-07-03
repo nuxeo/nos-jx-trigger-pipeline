@@ -1,15 +1,22 @@
 buildPack: go-cli
 pipelineConfig:
   pipelines:
-    overrides:
-    - name: next-version
-      step:
-        image: gcr.io/build-jx-prod/jxlabs-nos/jxl
-        sh: ./next-version.sh
-    - name: tag-version
-      step:
-        sh: jx step tag --version \$(cat VERSION) --no-apply
     release:
+      preBuild:
+        steps:
+        - name: fetch-tags
+          sh: git fetch --tags
+          image: bitnami/git
+      setVersion:
+        replace: true
+        steps:
+        - sh: jx step next-version --use-git-tag-only
+          name: next-version
+          image: gcr.io/jenkinsxio/jx
+          comment: so we can retrieve the version in later steps
+        - sh: jx step tag --version \$(cat VERSION)
+          image: gcr.io/jenkinsxio/jx
+          name: tag-version
       promote:
         steps:
         - command: ./promote.sh
