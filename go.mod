@@ -1,20 +1,28 @@
 module github.com/jenkins-x-labs/trigger-pipeline
 
 require (
-	github.com/cli/cli v0.6.2 // indirect
+	github.com/MakeNowJust/heredoc v1.0.0 // indirect
+	github.com/alecthomas/jsonschema v0.0.0-20200530073317-71f438968921 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jenkins-x/go-scm v1.5.143 // indirect
 	github.com/jenkins-x/golang-jenkins v0.0.0-20180919102630-65b83ad42314
-	github.com/jenkins-x/jx-apps v0.0.1 // indirect
-	github.com/jenkins-x/jx-helpers v1.0.25 // indirect
 	github.com/jenkins-x/jx-logging v0.0.10
 	github.com/jenkins-x/jx/v2 v2.1.90
 	github.com/magiconair/properties v1.8.0
+	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
+	github.com/stoewer/go-strcase v1.2.0 // indirect
 	github.com/stretchr/testify v1.6.1
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
+	golang.org/x/crypto v0.0.0-20200219234226-1ad67e1f0ef4 // indirect
+	gopkg.in/AlecAivazis/survey.v1 v1.8.8 // indirect
 	k8s.io/api v0.17.2
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
+	sigs.k8s.io/yaml v1.2.0 // indirect
 
 )
 
