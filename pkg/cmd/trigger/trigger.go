@@ -16,10 +16,10 @@ import (
 	"github.com/jenkins-x/jx/v2/pkg/cmd/helper"
 	"github.com/jenkins-x/jx/v2/pkg/gits"
 
+	"github.com/jenkins-x/jx-logging/pkg/log"
 	"github.com/jenkins-x/jx/v2/pkg/cmd/templates"
 	"github.com/jenkins-x/jx/v2/pkg/jenkins"
 	"github.com/jenkins-x/jx/v2/pkg/jenkinsfile"
-	"github.com/jenkins-x/jx-logging/pkg/log"
 	"github.com/jenkins-x/jx/v2/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -34,6 +34,7 @@ type TriggerOptions struct {
 	Jenkinsfile        string
 	JenkinsPath        string
 	JenkinsSelector    jenkinsutil.JenkinsSelectorOptions
+	Branch             string
 }
 
 var (
@@ -67,7 +68,7 @@ func NewCmdTrigger() (*cobra.Command, *TriggerOptions) {
 	cmd.Flags().StringVarP(&o.Jenkinsfile, "jenkinsfile", "f", jenkinsfile.Name, "The name of the Jenkinsfile to use")
 	cmd.Flags().StringVarP(&o.JenkinsPath, "jenkins-path", "p", "", "The Jenkins folder path to create the pipeline inside. If not specified it defaults to the git 'owner/repoName/branch'")
 	cmd.Flags().StringVarP(&o.JenkinsSelector.DevelopmentJenkinsURL, "dev-jenkins-url", "", "", "Specifies a local URL to access the jenkins server if you are not running this command inside a Kubernetes cluster and don't have Ingress resosurces for the Jenkins server and so cannot use Kubernetes Service discovery. E.g. could be 'http://localhost:8080' if you are using: kubectl port-forward jenkins-server1 8080:8080")
-
+	cmd.Flags().StringVarP(&o.Branch, "branch", "", "", "the branch to trigger a build")
 	o.JenkinsSelector.AddFlags(cmd)
 
 	defaultBatchMode := false
@@ -107,15 +108,18 @@ func (o *TriggerOptions) Run() error {
 		return err
 	}
 
-	branch, err := o.Git().Branch(o.Dir)
-	if err != nil {
-		return err
-	}
-	if branch == "" {
-		branch = "master"
+	if o.Branch == "" {
+		o.Branch, err = o.Git().Branch(o.Dir)
+		if err != nil {
+			return err
+		}
 	}
 
-	return o.TriggerPipeline(jenkinsClient, gitInfo, branch)
+	if o.Branch == "" {
+		o.Branch = "master"
+	}
+
+	return o.TriggerPipeline(jenkinsClient, gitInfo, o.Branch)
 }
 
 // TriggerPipeline triggers the pipeline after the main service clients are created
