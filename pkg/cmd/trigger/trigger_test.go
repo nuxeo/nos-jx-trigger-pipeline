@@ -1,6 +1,7 @@
 package trigger_test
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -15,14 +16,16 @@ func TestTrigger(t *testing.T) {
 	_, o := trigger.NewCmdTrigger()
 
 	jenkinsClient := &fake.FakeClient{}
-	branch := "master"
+	o.Branch = "master"
 	o.Dir = filepath.Join("test_data/sample")
 	gitInfo := &gits.GitRepository{
 		Host:         "https://github.com",
 		Organisation: "myowner",
 		Name:         "myrepo",
 	}
-	err := o.TriggerPipeline(jenkinsClient, gitInfo, branch)
+	o.JenkinsPath = fmt.Sprintf("%s/%s/%s", gitInfo.Organisation, gitInfo.Name, o.Branch)
+
+	err := o.TriggerPipeline(jenkinsClient, gitInfo)
 	require.NoError(t, err, "should not have failed")
 	assert.Equal(t, 1, len(jenkinsClient.BuildRequests), "should have a single build request")
 	br := jenkinsClient.BuildRequests[0]
