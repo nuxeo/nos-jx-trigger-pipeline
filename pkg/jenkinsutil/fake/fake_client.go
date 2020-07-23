@@ -97,8 +97,15 @@ func (f *FakeClient) GetBuild(gojenkins.Job, int) (gojenkins.Build, error) {
 	panic("implement me")
 }
 
-func (f *FakeClient) GetLastBuild(gojenkins.Job) (gojenkins.Build, error) {
-	panic("implement me")
+var lastbuildnumber = 0
+
+func (f *FakeClient) GetLastBuild(job gojenkins.Job) (gojenkins.Build, error) {
+	lastbuildnumber++
+	var build gojenkins.Build
+	build.Number = lastbuildnumber
+	build.Building = true
+	build.Url = fmt.Sprintf("%s/%d", job.Url, build.Number)
+	return build, nil
 }
 
 func (f *FakeClient) StopBuild(gojenkins.Job, int) error {
