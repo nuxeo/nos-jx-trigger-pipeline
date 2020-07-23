@@ -113,10 +113,9 @@ func (o *TriggerOptions) Run() error {
 		if err != nil {
 			return err
 		}
-	}
-
-	if o.Branch == "" {
-		o.Branch = "master"
+		if o.Branch == "" {
+			o.Branch = "master"
+		}
 	}
 
 	return o.TriggerPipeline(jenkinsClient, gitInfo, o.Branch)
@@ -124,6 +123,8 @@ func (o *TriggerOptions) Run() error {
 
 // TriggerPipeline triggers the pipeline after the main service clients are created
 func (o *TriggerOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, gitInfo *gits.GitRepository, branch string) error {
+	var job gojenkins.Job
+	var err error
 	jenkinsfileName := filepath.Join(o.Dir, o.Jenkinsfile)
 	exists, err := util.FileExists(jenkinsfileName)
 	if err != nil {
@@ -138,79 +139,104 @@ func (o *TriggerOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, 
 	}
 
 	paths := strings.Split(o.JenkinsPath, "/")
-	last := len(paths) - 1
-	for i, path := range paths {
-		folderPath := paths[0 : i+1]
-		folder, err := jenkinsClient.GetJobByPath(folderPath...)
-		fullPath := util.UrlJoin(folderPath...)
-		jobURL := util.UrlJoin(jenkinsClient.BaseURL(), fullPath)
 
-		if i < last {
-			// lets ensure there's a folder
-			err = helpers.Retry(3, time.Second*10, func() error {
-				if err != nil {
-					folderXML := jenkins.CreateFolderXML(jobURL, path)
-					if i == 0 {
-						err = jenkinsClient.CreateJobWithXML(folderXML, path)
-						if err != nil {
-							return errors.Wrapf(err, "failed to create the %s folder at %s in Jenkins", path, jobURL)
-						}
-					} else {
-						folders := strings.Join(paths[0:i], "/job/")
-						err = jenkinsClient.CreateFolderJobWithXML(folderXML, folders, path)
-						if err != nil {
-							return errors.Wrapf(err, "failed to create the %s folder in folders %s at %s in Jenkins", path, folders, jobURL)
-						}
-					}
-				} else {
-					c := folder.Class
-					if c != "com.cloudbees.hudson.plugins.folder.Folder" {
-						log.Logger().Warnf("Warning the folder %s is of class %s", jobURL, c)
-					}
-				}
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-		} else {
-			gitURL := gitInfo.CloneURL
-			log.Logger().Infof("Using git URL %s and branch %s", util.ColorInfo(gitURL), util.ColorInfo(branch))
-
-			err = helpers.Retry(3, time.Second*10, func() error {
-				if err != nil {
-					pipelineXML := jenkins.CreatePipelineXML(gitURL, branch, o.Jenkinsfile)
-					if i == 0 {
-						err = jenkinsClient.CreateJobWithXML(pipelineXML, path)
-						if err != nil {
-							return errors.Wrapf(err, "failed to create the %s pipeline at %s in Jenkins", path, jobURL)
-						}
-					} else {
-						folders := strings.Join(paths[0:i], "/job/")
-						err = jenkinsClient.CreateFolderJobWithXML(pipelineXML, folders, path)
-						if err != nil {
-							return errors.Wrapf(err, "failed to create the %s pipeline in folders %s at %s in Jenkins", path, folders, jobURL)
-						}
-					}
-				}
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-
-			job, err := jenkinsClient.GetJobByPath(paths...)
+	if o.MultiBranchProject {
+		job, err = jenkinsClient.GetMultiBranchJob(gitInfo.Organisation, gitInfo.Name, branch)
+		if err != nil {
+			job, err = jenkinsClient.GetJobByPath(gitInfo.Organisation, gitInfo.Name)
 			if err != nil {
 				return err
 			}
 			job.Url = jenkins.SwitchJenkinsBaseURL(job.Url, jenkinsClient.BaseURL())
 			jobPath := strings.Join(paths, "/")
-			log.Logger().Infof("triggering pipeline job %s", util.ColorInfo(jobPath))
+			log.Logger().Infof("scanning multibranch project %s", jobPath)
 			err = jenkinsClient.Build(job, url.Values{})
 			if err != nil {
-				return errors.Wrapf(err, "failed to trigger job %s", jobPath)
+				return errors.Wrapf(err, "failed to scan multibranch project %s", jobPath)
+			}
+			log.Logger().Infof("waiting for scan completion of %s", job.Url)
+			var logData gojenkins.LogData
+			err = jenkinsClient.GetLogFromURL(job.Url+"/indexing/console", 0, &logData)
+			if err != nil {
+				return err
+			}
+			job, err = jenkinsClient.GetMultiBranchJob(gitInfo.Organisation, gitInfo.Name, branch)
+		}
+	} else {
+		last := len(paths) - 1
+		for i, path := range paths {
+			folderPath := paths[0 : i+1]
+			folder, err := jenkinsClient.GetJobByPath(folderPath...)
+			fullPath := util.UrlJoin(folderPath...)
+			jobURL := util.UrlJoin(jenkinsClient.BaseURL(), fullPath)
+
+			if i < last {
+				// lets ensure there's a folder
+				err = helpers.Retry(3, time.Second*10, func() error {
+					if err != nil {
+						folderXML := jenkins.CreateFolderXML(jobURL, path)
+						if i == 0 {
+							err = jenkinsClient.CreateJobWithXML(folderXML, path)
+							if err != nil {
+								return errors.Wrapf(err, "failed to create the %s folder at %s in Jenkins", path, jobURL)
+							}
+						} else {
+							folders := strings.Join(paths[0:i], "/job/")
+							err = jenkinsClient.CreateFolderJobWithXML(folderXML, folders, path)
+							if err != nil {
+								return errors.Wrapf(err, "failed to create the %s folder in folders %s at %s in Jenkins", path, folders, jobURL)
+							}
+						}
+					} else {
+						c := folder.Class
+						if c != "com.cloudbees.hudson.plugins.folder.Folder" {
+							log.Logger().Warnf("Warning the folder %s is of class %s", jobURL, c)
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+			} else {
+				gitURL := gitInfo.CloneURL
+				log.Logger().Infof("Using git URL %s and branch %s", util.ColorInfo(gitURL), util.ColorInfo(branch))
+
+				err = helpers.Retry(3, time.Second*10, func() error {
+					if err != nil {
+						pipelineXML := jenkins.CreatePipelineXML(gitURL, branch, o.Jenkinsfile)
+						if i == 0 {
+							err = jenkinsClient.CreateJobWithXML(pipelineXML, path)
+							if err != nil {
+								return errors.Wrapf(err, "failed to create the %s pipeline at %s in Jenkins", path, jobURL)
+							}
+						} else {
+							folders := strings.Join(paths[0:i], "/job/")
+							err = jenkinsClient.CreateFolderJobWithXML(pipelineXML, folders, path)
+							if err != nil {
+								return errors.Wrapf(err, "failed to create the %s pipeline in folders %s at %s in Jenkins", path, folders, jobURL)
+							}
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+
+				job, err = jenkinsClient.GetJobByPath(paths...)
+				if err != nil {
+					return err
+				}
 			}
 		}
+	}
+	job.Url = jenkins.SwitchJenkinsBaseURL(job.Url, jenkinsClient.BaseURL())
+	jobPath := strings.Join(paths, "/")
+	log.Logger().Infof("triggering pipeline job %s", util.ColorInfo(jobPath))
+	err = jenkinsClient.Build(job, url.Values{})
+	if err != nil {
+		return errors.Wrapf(err, "failed to trigger job %s", jobPath)
 	}
 	return nil
 }
