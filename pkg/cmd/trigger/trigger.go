@@ -282,7 +282,7 @@ func (o *TriggerOptions) getOrCreateMultiBranchPipeline(jenkinsClient gojenkins.
 		return job, err
 	}
 
-	log.Logger().Infof("waiting for first build triggered", job.FullName)
+	log.Logger().Infof("waiting for first build triggered %s/%s", job.FullName, o.Branch)
 	err = gojenkins.Poll(1*time.Second, 5*time.Minute, fmt.Sprintf("poll for build of %s", job.FullName), func() (bool, error) {
 		build, err := jenkinsClient.GetLastBuild(job)
 		if err == nil {
@@ -337,7 +337,7 @@ func (o *TriggerOptions) triggerAndWaitForBuildToStart(jenkins gojenkins.Jenkins
 	previousBuild, err := jenkins.GetLastBuild(job)
 	if err != nil {
 		if !is404(err) {
-			return build, errors.Wrapf(err, "error finding last build for %s due to %v", job.FullName)
+			return build, errors.Wrapf(err, "error finding last build for %s due to %v", job.FullName, err)
 		}
 	} else {
 		previousBuildNumber = previousBuild.Number
@@ -345,7 +345,7 @@ func (o *TriggerOptions) triggerAndWaitForBuildToStart(jenkins gojenkins.Jenkins
 	err = jenkins.Build(job, nil)
 	if err != nil {
 		if !is404(err) {
-			return build, errors.Wrapf(err, "error triggering build %s due to %v", job.FullName)
+			return build, errors.Wrapf(err, "error triggering build %s due to %v", job.FullName, err)
 		}
 	}
 	// lets wait for a new build to start
@@ -354,7 +354,7 @@ func (o *TriggerOptions) triggerAndWaitForBuildToStart(jenkins gojenkins.Jenkins
 		build, err = jenkins.GetLastBuild(job)
 		if err != nil {
 			if !is404(err) {
-				return false, errors.Wrapf(err, "error finding last build for %s due to %v", job.FullName)
+				return false, errors.Wrapf(err, "error finding last build for %s due to %v", job.FullName, err)
 			}
 		} else {
 			buildNumber = build.Number
