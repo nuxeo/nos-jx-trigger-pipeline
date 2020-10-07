@@ -4,8 +4,16 @@
 *.so
 *.dylib
 
+# Make cache
+.tmp
+.mvn
+
 # Test binary, build with `go test -c`
 *.test
+
+# Jenkins-x outputs
+jenkins-x-effective.yml
+out
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

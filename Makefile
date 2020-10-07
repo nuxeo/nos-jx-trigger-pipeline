@@ -1,3 +1,5 @@
+include make.d/workspace.mk
+
 # Make does not offer a recursive wildcard function, so here's one:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
@@ -67,8 +69,6 @@ list: ## List all make targets
 
 .PHONY: help
 .DEFAULT_GOAL := help
-help:
-	@grep -h -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 full: check ## Build and run the tests
 check: build test ## Build and run the tests

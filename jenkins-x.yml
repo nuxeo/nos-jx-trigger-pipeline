@@ -1,13 +1,24 @@
+---
 buildPack: go-cli
 pipelineConfig:
   pipelines:
     release:
-      preBuild:
+      setVersion:
+        replace: true
         steps:
-        - name: fetch-tags
-          sh: git fetch --tags
+          - name: git-unshallow
+            sh: 'git fetch --quiet --unshallow origin'
+          - name: git-fetch-tags
+            sh: 'git fetch --quiet'
+          - name: create-version-file
+            sh: 'jx step next-version --version=$(make version)'
+          - name: tag-version
+            sh: >
+              jx step tag
+              --charts-value-repository=$DOCKER_REGISTRY/$DOCKER_REGISTRY_HOST/jxl
+              --version=$(cat VERSION)
       promote:
         steps:
-        - command: ./promote.sh
-          dir: /workspace/source
-          name: promote-release
+          - command: ./promote.sh
+            dir: /workspace/source
+            name: promote-release
