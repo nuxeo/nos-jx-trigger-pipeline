@@ -1,3 +1,5 @@
+include make.d/workspace.mk
+
 # Make does not offer a recursive wildcard function, so here's one:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
@@ -24,7 +26,7 @@ REPORTS_DIR=$(BUILD_TARGET)/reports
 GOTEST := $(GO) test
 
 # set dev version unless VERSION is explicitly set via environment
-VERSION ?= $(shell echo "$$(git for-each-ref refs/tags/ --count=1 --sort=-version:refname --format='%(refname:short)' 2>/dev/null)-dev+$(REV)" | sed 's/^v//')
+VERSION ?= $(version-tag)
 
 # Build flags for setting build-specific configuration at build time - defaults to empty
 #BUILD_TIME_CONFIG_FLAGS ?= ""
@@ -67,8 +69,6 @@ list: ## List all make targets
 
 .PHONY: help
 .DEFAULT_GOAL := help
-help:
-	@grep -h -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 full: check ## Build and run the tests
 check: build test ## Build and run the tests
@@ -139,11 +139,11 @@ get-fmt-deps: ## Install test dependencies
 fmt: importfmt ## Format the code
 	$(eval FORMATTED = $(shell $(GO) fmt ./...))
 	@if [ "$(FORMATTED)" == "" ]; \
-      	then \
-      	    echo "All Go files properly formatted"; \
-      	else \
-      		echo "Fixed formatting for: $(FORMATTED)"; \
-      	fi
+	then \
+	    echo "All Go files properly formatted"; \
+	else \
+		echo "Fixed formatting for: $(FORMATTED)"; \
+	fi
 
 .PHONY: importfmt
 importfmt: get-fmt-deps
