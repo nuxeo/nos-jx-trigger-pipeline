@@ -155,9 +155,8 @@ func (o *TriggerOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, 
 	if err != nil {
 		return errors.Wrapf(err, "cannot state build for %s", job.FullName)
 	}
-	if build.Result != "Success" {
+	if build.Result != "SUCCESS" {
 		message := fmt.Sprintf("build %s/%d result is %s", job.FullName, build.Number, build.Result)
-		log.Logger().Info(message)
 		err = errors.New(message)
 	}
 	return err
