@@ -162,6 +162,7 @@ func (o *TriggerOptions) TriggerPipeline(jenkinsClient gojenkins.JenkinsClient, 
 	return err
 }
 
+// PipelineFactory jenkins jobs factory for this repository
 type PipelineFactory func() (gojenkins.Job, error)
 
 func (o *TriggerOptions) getOrCreatePipelineFactory(jenkinsClient gojenkins.JenkinsClient, gitInfo *gits.GitRepository) PipelineFactory {
@@ -278,28 +279,6 @@ func (o *TriggerOptions) getOrCreateMultiBranchPipeline(jenkinsClient gojenkins.
 		log.Logger().Debugf("not yet available %s/%s", job.FullName, o.Branch)
 		return false, err
 	})
-	if err != nil {
-		return job, err
-	}
-
-	log.Logger().Infof("waiting for first build triggered %s/%s", job.FullName, o.Branch)
-	err = gojenkins.Poll(1*time.Second, 5*time.Minute, fmt.Sprintf("poll for build of %s", job.FullName), func() (bool, error) {
-		build, err := jenkinsClient.GetLastBuild(job)
-		if err == nil {
-			if !build.Building {
-				return false, nil
-			}
-			return true, nil
-		}
-		if is404(err) {
-			return false, nil
-		}
-		return false, err
-	})
-	if err != nil {
-		return job, err
-	}
-	err = o.cancelLastBuild(jenkinsClient, job, 5*time.Minute)
 	return job, err
 }
 
