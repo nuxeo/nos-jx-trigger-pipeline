@@ -1,4 +1,9 @@
-include make.d/workspace.mk
+include make.d/version.mk
+
+make.d/version.mk make.d &: 
+	jx gitops git setup
+	git submodule init
+	git submodule update
 
 # Make does not offer a recursive wildcard function, so here's one:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
