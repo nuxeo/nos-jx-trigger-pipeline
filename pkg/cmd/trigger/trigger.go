@@ -27,6 +27,7 @@ import (
 // TriggerOptions contains the command line arguments for this command
 type TriggerOptions struct {
 	jenkinsutil.JenkinsOptions
+	Namespace          string
 	MultiBranchProject bool
 	Dir                string
 	Jenkinsfile        string
@@ -44,7 +45,7 @@ var (
 `)
 
 	triggerExample = templates.Examples(`
-		# triggers the Jenkinsfile in the current directory in a Jenkins server 
+		# triggers the Jenkinsfile in the current directory in a Jenkins server
 		%s
 `)
 )
@@ -63,6 +64,8 @@ func NewCmdTrigger() (*cobra.Command, *TriggerOptions) {
 			helper.CheckErr(err)
 		},
 	}
+
+	cmd.Flags().StringVarP(&o.Namespace, "namespace", "n", "", "The jenkins namespace")
 	cmd.Flags().BoolVarP(&o.MultiBranchProject, "multi-branch-project", "", false, "Use a Multi Branch Project in Jenkins")
 	cmd.Flags().StringVarP(&o.Dir, "dir", "d", ".", "the directory to look for the Jenkisnfile inside")
 	cmd.Flags().StringVarP(&o.Jenkinsfile, "jenkinsfile", "f", jenkinsfile.Name, "The name of the Jenkinsfile to use")
@@ -88,6 +91,7 @@ func (o *TriggerOptions) Run() error {
 	if err != nil {
 		return err
 	}
+	o.ClientFactory.Namespace = o.Namespace
 	o.ClientFactory.Batch = o.BatchMode
 	o.ClientFactory.DevelopmentJenkinsURL = o.JenkinsSelector.DevelopmentJenkinsURL
 

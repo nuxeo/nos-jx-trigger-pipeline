@@ -93,7 +93,11 @@ func (f *ClientFactory) createJenkinsURL(jenkinsServiceName string) (string, err
 	svcURL := ""
 	var err error
 	if f.InCluster {
-		svcURL = "http://" + jenkinsServiceName + ":8080"
+		if f.Namespace != "" {
+			svcURL = "http://" + jenkinsServiceName + "." + f.Namespace + ":8080"
+		} else {
+			svcURL = "http://" + jenkinsServiceName + ":8080"
+		}
 	} else {
 		svcURL, err = services.FindServiceURL(f.KubeClient, f.Namespace, jenkinsServiceName)
 		if err != nil {
@@ -103,7 +107,7 @@ func (f *ClientFactory) createJenkinsURL(jenkinsServiceName string) (string, err
 	if svcURL == "" {
 		if f.InCluster {
 			// lets use the local service URL
-			svcURL = "http://" + jenkinsServiceName
+			svcURL = "http://" + jenkinsServiceName + ":8080"
 		} else {
 			// lets allow the developer to pass in a custom URL if we are testing locally without ingress on the jenkins server
 			// and we are using: kubectl port-forward jenkins-server1 8080:8080
